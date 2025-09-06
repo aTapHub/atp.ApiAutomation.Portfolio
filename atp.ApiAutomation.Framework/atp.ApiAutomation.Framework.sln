@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36414.22 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "atp.ApiAutomation.Framework", "atp.ApiAutomation.Framework\atp.ApiAutomation.Framework.csproj", "{D69B98A9-623C-471A-825F-D75FE3A7D1AE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "atp.ApiAutomation.Framework", "atp.ApiAutomation.Framework.csproj", "{D69B98A9-623C-471A-825F-D75FE3A7D1AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
