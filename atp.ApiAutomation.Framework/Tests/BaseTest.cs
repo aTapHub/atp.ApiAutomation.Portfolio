@@ -1,11 +1,6 @@
 ﻿using atp.ApiAutomation.Framework.Configurations;
 using Microsoft.Extensions.Configuration;
 using RestSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace atp.ApiAutomation.Framework.Tests
 {

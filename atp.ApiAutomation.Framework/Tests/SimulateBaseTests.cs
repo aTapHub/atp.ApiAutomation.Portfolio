@@ -1,9 +1,4 @@
 ﻿using atp.ApiAutomation.Framework.Services.Simulate;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace atp.ApiAutomation.Framework.Tests
 {

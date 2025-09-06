@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace atp.ApiAutomation.Framework.Configurations
+﻿namespace atp.ApiAutomation.Framework.Configurations
 {
     public class ApiSettings
     {
