@@ -9,6 +9,13 @@ namespace atp.ApiAutomation.Framework.Services
 {
     public class BaseService
     {
+        public RestClient client;
+
+        public BaseService(RestClient client)
+        {
+            this.client = client;
+        }
+
 
         public RestRequest GetRequest(string endpoint, Method method )
         { 

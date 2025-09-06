@@ -11,19 +11,15 @@ namespace atp.ApiAutomation.Framework.Services.Employees
 {
     public class EmployeesService : BaseService
     {
-        RestClient _client;
-
-        public EmployeesService(RestClient client)
+        public EmployeesService(RestClient client) : base(client)
         {
-            _client = client;
         }
-        
 
         public async Task<RestResponse> GetAllEmployees(CancellationToken ct = default) 
         { 
             RestRequest request = new RestRequest(EmployeeEndpoints.Employees, Method.Get);
 
-            return await _client.ExecuteAsync(request, ct);
+            return await client.ExecuteAsync(request, ct);
         }
 
         public async Task<RestResponse> GetEmployeeById(string id, CancellationToken ct = default)
@@ -31,7 +27,7 @@ namespace atp.ApiAutomation.Framework.Services.Employees
             var request = GetRequest(EmployeeEndpoints.EmployeeById, Method.Get);
             request.AddUrlSegment("id", id);
 
-            return await _client.ExecuteAsync(request,ct);
+            return await client.ExecuteAsync(request,ct);
         }
 
         public async Task<RestResponse> CreateEmployee(CreateEmployeeModel employee, CancellationToken ct = default) 
@@ -39,7 +35,7 @@ namespace atp.ApiAutomation.Framework.Services.Employees
             var request = GetRequest(EmployeeEndpoints.Employees, Method.Post);
             request.AddJsonBody(JsonSerializer.Serialize(employee));
 
-            return await _client.ExecuteAsync(request, ct);
+            return await client.ExecuteAsync(request, ct);
         }
 
         public async Task<RestResponse> UpdateEmployee(string id, CreateEmployeeModel employee, CancellationToken ct = default) 
@@ -47,7 +43,7 @@ namespace atp.ApiAutomation.Framework.Services.Employees
             var request = GetRequest(EmployeeEndpoints.EmployeeById, Method.Put);
             request.AddUrlSegment("id", id);
             request.AddJsonBody(JsonSerializer.Serialize(employee));
-            return await _client.ExecuteAsync(request, ct);
+            return await client.ExecuteAsync(request, ct);
         }
 
         public async Task<RestResponse> UpdateEmployee(string id, string attribute, string value,  CancellationToken ct = default) 
@@ -76,7 +72,7 @@ namespace atp.ApiAutomation.Framework.Services.Employees
         {
             var request = GetRequest(EmployeeEndpoints.EmployeeById, Method.Delete);
             request.AddUrlSegment("id", id);
-            return await _client.ExecuteAsync(request, ct);
+            return await client.ExecuteAsync(request, ct);
         }
 
 

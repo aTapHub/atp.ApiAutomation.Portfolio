@@ -12,7 +12,7 @@ namespace atp.ApiAutomation.Framework.Services.Simulate
     public static class SimulateEndpoints
     {
 
-        public const string  TokenEndpoint = "/api/v1/simulate/ token";
+        public const string  TokenEndpoint = "/api/v1/simulate/token";
         // post
 
         public const string GetAllEmployeesEndpoint = "/api/v1/simulate/get/employees";

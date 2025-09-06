@@ -5,16 +5,16 @@ namespace atp.ApiAutomation.Framework.Tests
     public class EmployeeEndpointTests : BaseTest
     {
         EmployeesService employeesService;
-        public EmployeeEndpointTests(string url) : base(url)
-        {
-            employeesService = new EmployeesService(client);
-        }
 
-        [SetUp]
-        public void Setup()
+        [OneTimeSetUp]
+        public void GlobalSetup()
         {
-            // generate tests data ?
+            base.GlobalSetup();
+
+            employeesService = new EmployeesService(client);
+
         }
+        
 
         [Test]
         public void GetAllEmployees()
@@ -24,8 +24,8 @@ namespace atp.ApiAutomation.Framework.Tests
         }
 
         // get all employee ids and use them in test cases
-        [TestCase("123")]
-        [TestCase("456")]
+        [TestCase("1")]
+        [TestCase("3")]
         public void GetEmployeeById(string id)
         { 
             var response = employeesService.GetEmployeeById(id).Result;
