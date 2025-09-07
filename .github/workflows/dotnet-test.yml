@@ -16,10 +16,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '8.0.x'
+    #  - name: Set up .NET
+    #    uses: actions/setup-dotnet@v3
+    #    with:
+    #      dotnet-version: '8.0.x'
 
       - name: Start Application Under Test (AUT)
         run: docker run -d --rm --name qa-practice-api -p8887:8081 rvancea/qa-practice-api:latest
