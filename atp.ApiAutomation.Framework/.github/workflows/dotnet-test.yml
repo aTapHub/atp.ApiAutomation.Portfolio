@@ -1,0 +1,50 @@
+name: API Test Automation Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  API_USERNAME: ${{ secrets.API_USERNAME }}
+  API_PASSWORD: ${{ secrets.API_PASSWORD }}
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Start Application Under Test (AUT)
+        run: docker run -d --rm --name qa-practice-api -p8887:8081 rvancea/qa-practice-api:latest
+
+      - name: Wait for AUT to be ready
+        run: |
+          echo "Waiting for AUT to start..."
+          until curl -s http://localhost:8887/swagger/index.html > /dev/null; do
+            sleep 1
+          done
+          echo "AUT is ready!"
+      
+      - name: Update appSettings.json
+        run: |
+          json_string='{"ApiSettings":{"Host":"http://localhost:8887"}}'
+          
+          # Use jq to update the JSON file. jq is pre-installed on GitHub runners.
+          jq '.ApiSettings.Host = "http://localhost:8887"' ./atp.ApiAutomation.Framework/appSettings.json > temp.json
+          mv temp.json ./atp.ApiAutomation.Framework/appSettings.json
+      
+      - name: Data Generation Stage
+        run: echo "Data generation stage is currently empty."
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build and run tests
+        run: dotnet test
