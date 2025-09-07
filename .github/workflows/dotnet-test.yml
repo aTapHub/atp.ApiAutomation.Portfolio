@@ -24,13 +24,13 @@ jobs:
       - name: Start Application Under Test (AUT)
         run: docker run -d --rm --name qa-practice-api -p8887:8081 rvancea/qa-practice-api:latest
 
-      - name: Wait for AUT to be ready
-        run: |
-          echo "Waiting for AUT to start..."
-          until curl -s http://localhost:8887/swagger/index.html > /dev/null; do
-            sleep 1
-          done
-          echo "AUT is ready!"
+    #  - name: Wait for AUT to be ready
+    #    run: |
+    #      echo "Waiting for AUT to start..."
+    #      until curl -s http://localhost:8887/swagger/index.html > /dev/null; do
+    #        sleep 1
+    #      done
+    #      echo "AUT is ready!"
       
       - name: Update appSettings.json
         run: |
