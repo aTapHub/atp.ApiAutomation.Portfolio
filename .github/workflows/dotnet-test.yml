@@ -1,4 +1,4 @@
-name: API Test Automation Pipeline
+name: .NET Test Automation Pipeline
 
 on:
   push:
@@ -11,43 +11,52 @@ env:
 
 jobs:
   run-tests:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-    #  - name: Set up .NET
-    #    uses: actions/setup-dotnet@v3
-    #    with:
-    #      dotnet-version: '8.0.x'
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
 
       - name: Start Application Under Test (AUT)
         run: docker run -d --rm --name qa-practice-api -p8887:8081 rvancea/qa-practice-api:latest
 
-    #  - name: Wait for AUT to be ready
-    #    run: |
-    #      echo "Waiting for AUT to start..."
-    #      until curl -s http://localhost:8887/swagger/index.html > /dev/null; do
-    #        sleep 1
-    #      done
-    #      echo "AUT is ready!"
+      - name: Wait for AUT to be ready
+        run: |
+          echo "Waiting for AUT to start..."
+          until curl -s http://localhost:8887/swagger/index.html > /dev/null; do
+            sleep 1
+          done
+          echo "AUT is ready!"
       
       - name: Update appSettings.json
         run: |
-          $json_string = '{"ApiSettings":{"Host":"http://localhost:8887"}}'
-          # Use jq to update the JSON file. 
           jq '.ApiSettings.Host = "http://localhost:8887"' ./atp.ApiAutomation.Framework/appSettings.json > temp.json
-          Move-Item -Path temp.json -Destination ./atp.ApiAutomation.Framework/appSettings.json -Force
-        shell: "C:\\Program Files\\Git\\bin\\bash.exe"
+          mv temp.json ./atp.ApiAutomation.Framework/appSettings.json
+
+      - name: Log appSettings.json after modification
+        run: |
+          echo "--- appSettings.json contents after modification ---"
+          cat ./atp.ApiAutomation.Framework/appSettings.json
+          echo "----------------------------------------------------"
       
       - name: Data Generation Stage
         run: echo "Data generation stage is currently empty."
 
       - name: Restore dependencies
         run: dotnet restore ./atp.ApiAutomation.Framework/atp.ApiAutomation.Framework.sln
-        
+
       - name: Build the solution
         run: dotnet build ./atp.ApiAutomation.Framework/atp.ApiAutomation.Framework.sln
 
-      - name: Build and run tests
+      - name: Log appSettings.json in the output directory
+        run: |
+          echo "--- appSettings.json contents in the output directory ---"
+          cat ./atp.ApiAutomation.Framework/bin/Debug/net6.0/appsettings.json
+          echo "----------------------------------------------------"
+
+      - name: Run tests
         run: dotnet test ./atp.ApiAutomation.Framework/atp.ApiAutomation.Framework.sln
