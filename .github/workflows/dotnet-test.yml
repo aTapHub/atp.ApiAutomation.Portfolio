@@ -11,26 +11,27 @@ env:
 
 jobs:
   run-tests:
-    runs-on: ubuntu-latest
+    runs on: self-hosted
+    #runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '8.0.x'
+      #- name: Set up .NET
+      #  uses: actions/setup-dotnet@v3
+      #  with:
+      #    dotnet-version: '8.0.x'
 
-      - name: Start Application Under Test (AUT)
-        run: docker run -d --rm --name qa-practice-api -p8887:8081 rvancea/qa-practice-api:latest
+      #- name: Start Application Under Test (AUT)
+      #  run: docker run -d --rm --name qa-practice-api -p8887:8081 rvancea/qa-practice-api:latest
 
-      - name: Wait for AUT to be ready
-        run: |
-          echo "Waiting for AUT to start..."
-          until curl -s http://localhost:8887/swagger/index.html > /dev/null; do
-            sleep 1
-          done
-          echo "AUT is ready!"
+      #- name: Wait for AUT to be ready
+      #  run: |
+      #    echo "Waiting for AUT to start..."
+      #    until curl -s http://localhost:8887/swagger/index.html > /dev/null; do
+      #      sleep 1
+      #    done
+      #    echo "AUT is ready!"
       
       - name: Data Generation Stage
         run: echo "Data generation stage is currently empty."
