@@ -44,7 +44,7 @@ jobs:
         run: echo "Data generation stage is currently empty."
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore ./atp.ApiAutomation.Framework/atp.ApiAutomation.Portfolio.sln
 
       - name: Build and run tests
-        run: dotnet test
+        run: dotnet test ./atp.ApiAutomation.Framework/atp.ApiAutomation.Portfolio.sln
