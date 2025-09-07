@@ -34,11 +34,10 @@ jobs:
       
       - name: Update appSettings.json
         run: |
-          json_string='{"ApiSettings":{"Host":"http://localhost:8887"}}'
-          
-          # Use jq to update the JSON file. jq is pre-installed on GitHub runners.
+          $json_string = '{"ApiSettings":{"Host":"http://localhost:8887"}}'
+          # Use jq to update the JSON file. 
           jq '.ApiSettings.Host = "http://localhost:8887"' ./atp.ApiAutomation.Framework/appSettings.json > temp.json
-          mv temp.json ./atp.ApiAutomation.Framework/appSettings.json
+          Move-Item -Path temp.json -Destination ./atp.ApiAutomation.Framework/appSettings.json -Force
       
       - name: Data Generation Stage
         run: echo "Data generation stage is currently empty."
