@@ -32,17 +32,6 @@ jobs:
           done
           echo "AUT is ready!"
       
-      - name: Update appSettings.json
-        run: |
-          jq '.ApiSettings.Host = "http://localhost:8887"' ./atp.ApiAutomation.Framework/appSettings.json > temp.json
-          mv temp.json ./atp.ApiAutomation.Framework/appSettings.json
-
-      - name: Log appSettings.json after modification
-        run: |
-          echo "--- appSettings.json contents after modification ---"
-          cat ./atp.ApiAutomation.Framework/appSettings.json
-          echo "----------------------------------------------------"
-      
       - name: Data Generation Stage
         run: echo "Data generation stage is currently empty."
 
@@ -51,16 +40,6 @@ jobs:
 
       - name: Build the solution
         run: dotnet build ./atp.ApiAutomation.Framework/atp.ApiAutomation.Framework.sln
-
-      - name: Copy appSettings.json to output directory
-        run: |
-          cp ./atp.ApiAutomation.Framework/appSettings.json ./atp.ApiAutomation.Framework/bin/Debug/net6.0/
-
-      - name: Log appSettings.json in the output directory
-        run: |
-          echo "--- appSettings.json contents in the output directory ---"
-          cat ./atp.ApiAutomation.Framework/bin/Debug/net6.0/appSettings.json
-          echo "----------------------------------------------------"
 
       - name: Run tests
         run: dotnet test ./atp.ApiAutomation.Framework/atp.ApiAutomation.Framework.sln
