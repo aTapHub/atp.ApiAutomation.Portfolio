@@ -47,7 +47,7 @@ jobs:
         run: dotnet restore ./atp.ApiAutomation.Framework/atp.ApiAutomation.Framework.sln
         
       - name: Build the solution
-        run: dotnet build ./atp.ApiAutomation.Framework/atp.ApiAutomation.Portfolio.sln
+        run: dotnet build ./atp.ApiAutomation.Framework/atp.ApiAutomation.Framework.sln
 
       - name: Build and run tests
         run: dotnet test ./atp.ApiAutomation.Framework/atp.ApiAutomation.Framework.sln
