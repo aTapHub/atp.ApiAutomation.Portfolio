@@ -7,7 +7,7 @@ namespace atp.ApiAutomation.Framework.Tests
     public class BaseTest
     {
         public static IConfigurationRoot Configuration { get; private set; }
-        public static ApiSettings Settings { get; private set; }
+        public static ApiSettings? Settings { get; private set; }
         public RestClient client;
 
 

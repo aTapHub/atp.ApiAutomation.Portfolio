@@ -18,7 +18,11 @@ namespace atp.ApiAutomation.Framework.Services.Simulate
             var request = GetRequest(SimulateEndpoints.TokenEndpoint, Method.Post);
             request.AddBody(new { username = _settings.API_USERNAME, password = _settings.API_PASSWORD });
             
-            return JObject.Parse(client.ExecuteAsync(request).Result.Content)["token"]?.ToString();
+            var result = await client.ExecuteAsync(request);
+            
+            return JObject.Parse(result.Content)["token"]?.ToString();
+
+
         }
 
 

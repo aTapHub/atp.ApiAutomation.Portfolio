@@ -7,7 +7,7 @@ namespace atp.ApiAutomation.Framework.Tests
         public SimulateService simulateService;
         
         [OneTimeSetUp]
-        public void GlobalSetup()
+        public override void GlobalSetup()
         {
            base.GlobalSetup();
            simulateService = new SimulateService(Settings, client);

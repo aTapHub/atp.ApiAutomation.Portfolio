@@ -7,7 +7,7 @@ namespace atp.ApiAutomation.Framework.Tests
         EmployeesService employeesService;
 
         [OneTimeSetUp]
-        public void GlobalSetup()
+        public override void GlobalSetup()
         {
             base.GlobalSetup();
 
@@ -17,18 +17,18 @@ namespace atp.ApiAutomation.Framework.Tests
         
 
         [Test]
-        public void GetAllEmployees()
+        public async Task GetAllEmployees()
         {
-            var response = employeesService.GetAllEmployees().Result;
+            var response = await employeesService.GetAllEmployees();
             // add assertions
         }
 
         // get all employee ids and use them in test cases
         [TestCase("1")]
         [TestCase("3")]
-        public void GetEmployeeById(string id)
+        public async Task GetEmployeeById(string id)
         { 
-            var response = employeesService.GetEmployeeById(id).Result;
+            var response = await employeesService.GetEmployeeById(id);
         }
     }
 }

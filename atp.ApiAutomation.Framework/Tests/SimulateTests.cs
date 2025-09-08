@@ -7,13 +7,13 @@ namespace atp.ApiAutomation.Framework.Tests
     {
 
         [Test]
-        public void GetAllEmployeesWithAuth() 
+        public async Task GetAllEmployeesWithAuth() 
         {
 
             Console.WriteLine($"Username from settings: {Settings.API_USERNAME}");
             Console.WriteLine($"Password from settings: {Settings.API_PASSWORD}");
 
-            var response = simulateService.GetAllEmployees().Result;
+            var response = await simulateService.GetAllEmployees();
 
             // tests
             response.IsSuccessful.Should().BeTrue();
