@@ -11,6 +11,7 @@ namespace atp.ApiAutomation.Framework.Tests
         {
            base.GlobalSetup();
            simulateService = new SimulateService(Settings, client);
+           Console.WriteLine("This is from SimulateTestBase");
         }
 
     }

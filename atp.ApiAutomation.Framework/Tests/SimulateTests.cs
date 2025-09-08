@@ -12,6 +12,7 @@ namespace atp.ApiAutomation.Framework.Tests
 
             Console.WriteLine($"Username from settings: {Settings.API_USERNAME}");
             Console.WriteLine($"Password from settings: {Settings.API_PASSWORD}");
+            Console.WriteLine($"Host from settings: {Settings.Host}");
 
             var response = await simulateService.GetAllEmployees();
 

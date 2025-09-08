@@ -14,6 +14,8 @@ namespace atp.ApiAutomation.Framework.Tests
         [OneTimeSetUp]
         public virtual void GlobalSetup()
         {
+            Console.WriteLine("Starting BaseTest");
+
             Configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddEnvironmentVariables(prefix: "API_")
@@ -24,6 +26,8 @@ namespace atp.ApiAutomation.Framework.Tests
             Configuration.GetSection("ApiSettings").Bind(Settings);
 
             client = new RestClient(Settings.Host);
+
+            Console.WriteLine("Ending BaseTest");
         }
 
         [OneTimeTearDown]
