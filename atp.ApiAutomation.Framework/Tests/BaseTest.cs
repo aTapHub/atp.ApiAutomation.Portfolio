@@ -17,7 +17,7 @@ namespace atp.ApiAutomation.Framework.Tests
         
             Configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddEnvironmentVariables()
+                .AddEnvironmentVariables(prefix: "API_")
                 .AddUserSecrets<BaseTest>(optional: true)
                 .Build();
 
