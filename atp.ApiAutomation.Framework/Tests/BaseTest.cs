@@ -12,7 +12,7 @@ namespace atp.ApiAutomation.Framework.Tests
 
 
         [OneTimeSetUp]
-        public void GlobalSetup()
+        public virtual void GlobalSetup()
         {
             Configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
