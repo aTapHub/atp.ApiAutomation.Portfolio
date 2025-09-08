@@ -41,7 +41,7 @@ jobs:
       - name: Build the solution
         run: dotnet build ./atp.ApiAutomation.Framework/atp.ApiAutomation.Framework.sln
 
-      - name: Debug: List output directory contents
+      - name: Debug List output directory contents
         run: ls -al ./atp.ApiAutomation.Framework/bin/Debug/net8.0/
 
       - name: Run tests
