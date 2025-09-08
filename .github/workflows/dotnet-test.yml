@@ -6,8 +6,8 @@ on:
       - main
 
 env:
-  API_USERNAME: ${{ secrets.API_USERNAME }}
-  API_PASSWORD: ${{ secrets.API_PASSWORD }}
+  API_USERNAME: ${{secrets.API_USERNAME}}
+  API_PASSWORD: ${{secrets.API_PASSWORD}}
 
 jobs:
   run-tests:
@@ -41,11 +41,11 @@ jobs:
       - name: Build the solution
         run: dotnet build ./atp.ApiAutomation.Framework/atp.ApiAutomation.Framework.sln
 
-      - name: Debug List output directory contents
-        run: ls -al ./atp.ApiAutomation.Framework/bin/Debug/net8.0/
+      - name: Debug secrets
+        run: echo ${{secrets.API_USERNAME}} ${{secrets.API_PASSWORD}}
 
       - name: Run tests
         run: dotnet test ./atp.ApiAutomation.Framework/atp.ApiAutomation.Framework.sln
         env:
-          API_USERNAME: ${{ secrets.API_USERNAME }}
-          API_PASSWORD: ${{ secrets.API_PASSWORD }}
+          API_USERNAME: ${{secrets.API_USERNAME}}
+          API_PASSWORD: ${{secrets.API_PASSWORD}}
