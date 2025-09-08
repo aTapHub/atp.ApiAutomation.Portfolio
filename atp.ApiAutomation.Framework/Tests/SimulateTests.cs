@@ -9,6 +9,10 @@ namespace atp.ApiAutomation.Framework.Tests
         [Test]
         public void GetAllEmployeesWithAuth() 
         {
+
+            Console.WriteLine($"Username from settings: {Settings.Username}");
+            Console.WriteLine($"Password from settings: {Settings.Password}");
+
             var response = simulateService.GetAllEmployees().Result;
 
             // tests
