@@ -3,7 +3,7 @@
     public class ApiSettings
     {
         public string Host { get; set; }
-        public string USRNAME { get; set; }
-        public string PASSWORD { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
     }
 }
