@@ -47,5 +47,5 @@ jobs:
       - name: Run tests
         run: dotnet test ./atp.ApiAutomation.Framework/atp.ApiAutomation.Framework.sln
         env:
-          ApiSettings_API_USERNAME: ${{secrets.API_USERNAME}}
-          ApiSettings_API_PASSWORD: ${{secrets.API_PASSWORD}}
+          ApiSettings__API_USERNAME: ${{secrets.API_USERNAME}}
+          ApiSettings__API_PASSWORD: ${{secrets.API_PASSWORD}}
