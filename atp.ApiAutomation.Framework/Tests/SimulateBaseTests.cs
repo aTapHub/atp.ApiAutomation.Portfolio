@@ -1,4 +1,5 @@
 ﻿using atp.ApiAutomation.Framework.Services.Simulate;
+using Microsoft.Extensions.Logging;
 
 namespace atp.ApiAutomation.Framework.Tests
 {
@@ -10,8 +11,10 @@ namespace atp.ApiAutomation.Framework.Tests
         public override void GlobalSetup()
         {
            base.GlobalSetup();
-           simulateService = new SimulateService(Settings, client);
-           Console.WriteLine("This is from SimulateTestBase");
+
+            var serviceLogger = LoggerFactory.CreateLogger<SimulateService>();
+            simulateService = new SimulateService(Settings, client, serviceLogger);
+           
         }
 
     }

@@ -1,4 +1,5 @@
 using atp.ApiAutomation.Framework.Services.Employees;
+using Microsoft.Extensions.Logging;
 
 namespace atp.ApiAutomation.Framework.Tests
 {
@@ -10,8 +11,9 @@ namespace atp.ApiAutomation.Framework.Tests
         public override void GlobalSetup()
         {
             base.GlobalSetup();
+            var serviceLogger = LoggerFactory.CreateLogger<EmployeesService>();
 
-            employeesService = new EmployeesService(client);
+            employeesService = new EmployeesService(client, Settings, serviceLogger);
 
         }
         

@@ -1,22 +1,18 @@
 ﻿using atp.ApiAutomation.Framework.Configurations;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 
 namespace atp.ApiAutomation.Framework.Services.Simulate
 {
-    public class SimulateService : BaseService
+    public class SimulateService(ApiSettings apiSettings, RestClient client,
+                        ILogger<SimulateService> logger) : BaseService(client, apiSettings, logger)
     {
-        private readonly ApiSettings _settings;
-        public SimulateService(ApiSettings apiSettings, RestClient client) : base(client)
-        {
-            _settings = apiSettings;
-        }
-
         public async Task<string> GetToken() 
         { 
         
             var request = GetRequest(SimulateEndpoints.TokenEndpoint, Method.Post);
-            request.AddBody(new { username = _settings.API_USERNAME, password = _settings.API_PASSWORD });
+            request.AddBody(new { username = settings.API_USERNAME, password = settings.API_PASSWORD });
             
             var result = await client.ExecuteAsync(request);
             
