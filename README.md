@@ -27,3 +27,38 @@ Libraries used:
 
 <img width="20" height="20" src="https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration/6.0.0/icon" alt="Microsoft.Extensions.Configuration Icon"> Microsoft.Extensions.Configuration
 
+----------------------------------------
+Framework Directory structure
+
+/atp.ApiAutomation.Framework
+|
+├── /.github
+|   └── /workflows
+|       └── dotnet-test.yml
+|
+├── /Configurations
+|   └── ApiSettings.cs
+|
+├── /Models
+|   └── CreateEmployeeModel.cs
+|
+├── /Services
+|   ├── /Employees
+|   │   ├── EmployeeEndpoints.cs
+|   │   └── EmployeesService.cs
+|   ├── /Simulate
+|   │   ├── SimulateEndpoints.cs
+|   │   └── SimulateService.cs
+|   └── BaseService.cs
+|
+├── /Tests
+|   ├── BaseTest.cs
+|   ├── EmployeesEndpointTests.cs
+|   ├── SimulateBaseTests.cs
+|   └── SimulateTests.cs
+|
+├── appsettings.json
+├── atp.ApiAutomation.Framework.csproj
+├── atp.ApiAutomation.Framework.sln
+├── .gitignore
+└── README.md
