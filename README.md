@@ -28,8 +28,9 @@ Libraries used:
 <img width="20" height="20" src="https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration/6.0.0/icon" alt="Microsoft.Extensions.Configuration Icon"> Microsoft.Extensions.Configuration
 
 ----------------------------------------
-Framework Directory structure
+### **Test Framework Structure**
 
+```text
 /atp.ApiAutomation.Framework
 |
 ├── /.github
