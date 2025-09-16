@@ -8,6 +8,8 @@
         public string dob { get; set; }
         public string email { get; set; }
 
+        public CreateEmployeeModel() { }
+
         public CreateEmployeeModel(string id, string firstName, string lastName, string dob, string email)
         {
             this.id = id;
