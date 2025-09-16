@@ -15,9 +15,15 @@ namespace atp.ApiAutomation.Framework.Services.Simulate
             request.AddBody(new { username = settings.API_USERNAME, password = settings.API_PASSWORD });
             
             var result = await client.ExecuteAsync(request);
-            
-            return JObject.Parse(result.Content)["token"]?.ToString();
 
+            if (string.IsNullOrEmpty(result?.Content))
+            { 
+             throw new InvalidOperationException("Failed to retrieve token, response content is null.");
+            }
+          
+            var token = JObject.Parse(result.Content!)["token"]?.ToString();
+            return token ?? throw new InvalidOperationException("Token not found in response content.");
+      
         }
 
 

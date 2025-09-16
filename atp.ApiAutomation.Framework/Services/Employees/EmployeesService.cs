@@ -15,9 +15,9 @@ namespace atp.ApiAutomation.Framework.Services.Employees
 
             var response = await client.ExecuteAsync(request, ct);
 
-            if (!response.IsSuccessful)
+            if (response == null)
             {
-                throw new InvalidOperationException($"Failed to get employees. Status Code: {response.StatusCode}, Error Message: {response.ErrorMessage}");
+                throw new InvalidOperationException($"Failed to get employees, response is null. Status Code: {response?.StatusCode}, Error Message: {response?.ErrorMessage}");
             }
 
             return response;
@@ -28,7 +28,14 @@ namespace atp.ApiAutomation.Framework.Services.Employees
             var request = GetRequest(EmployeeEndpoints.EmployeeById, Method.Get);
             request.AddUrlSegment("id", id);
 
-            return await client.ExecuteAsync(request,ct);
+            var response = await client.ExecuteAsync(request, ct);
+
+            if (response == null)
+            {
+                throw new InvalidOperationException($"Failed to get employee by id, response is null. Status Code: {response?.StatusCode}, Error Message: {response?.ErrorMessage}");
+            }
+
+            return response;
         }
 
         public async Task<RestResponse> CreateEmployee(CreateEmployeeModel employee, CancellationToken ct = default) 
@@ -36,7 +43,14 @@ namespace atp.ApiAutomation.Framework.Services.Employees
             var request = GetRequest(EmployeeEndpoints.Employees, Method.Post);
             request.AddJsonBody(JsonSerializer.Serialize(employee));
 
-            return await client.ExecuteAsync(request, ct);
+            var response = await client.ExecuteAsync(request, ct);
+
+            if (response == null)
+            {
+                throw new InvalidOperationException($"Failed to create employee, response is null. Status Code: {response?.StatusCode}, Error Message: {response?.ErrorMessage}");
+            }
+
+            return response;
         }
 
         public async Task<RestResponse> UpdateEmployee(string id, CreateEmployeeModel employee, CancellationToken ct = default) 
@@ -44,7 +58,17 @@ namespace atp.ApiAutomation.Framework.Services.Employees
             var request = GetRequest(EmployeeEndpoints.EmployeeById, Method.Put);
             request.AddUrlSegment("id", id);
             request.AddJsonBody(JsonSerializer.Serialize(employee));
-            return await client.ExecuteAsync(request, ct);
+
+            var response = await client.ExecuteAsync(request, ct);
+
+            if (response == null)
+            {
+                throw new InvalidOperationException($"Failed to update employee, response is null. Status Code: {response?.StatusCode}, Error Message: {response?.ErrorMessage}");
+            }
+
+            return response;
+
+            
         }
 
         public async Task<RestResponse> UpdateEmployee(string id, string attribute, string value,  CancellationToken ct = default) 
@@ -53,17 +77,19 @@ namespace atp.ApiAutomation.Framework.Services.Employees
 
 
             // verify that the response is not null and is successful
-            if (employeeResponse == null || !employeeResponse.IsSuccessful)
+            if (employeeResponse.Content == null)
             {
-                return employeeResponse ?? new RestResponse
-                {
-                    StatusCode = System.Net.HttpStatusCode.InternalServerError,
-                    ErrorMessage = "GetEmployeeById returned a null response."
-                };
+                throw new InvalidOperationException("Response content body is null");
             }
 
+            
             var employeeResponseBody = JsonSerializer.Deserialize<CreateEmployeeModel>(employeeResponse.Content);
             employeeResponseBody?.GetType().GetProperty(attribute)?.SetValue(employeeResponseBody, value);
+
+            if (employeeResponseBody == null)
+            {
+                throw new InvalidOperationException("Failed to deserialize employee response body or body is null");
+            }
 
             return await UpdateEmployee(id, employeeResponseBody, ct);
 
