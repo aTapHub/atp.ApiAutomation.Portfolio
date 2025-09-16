@@ -18,7 +18,6 @@ namespace atp.ApiAutomation.Framework.Services.Simulate
             
             return JObject.Parse(result.Content)["token"]?.ToString();
 
-
         }
 
 

@@ -1,4 +1,5 @@
 using atp.ApiAutomation.Framework.Services.Employees;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace atp.ApiAutomation.Framework.Tests
@@ -7,13 +8,18 @@ namespace atp.ApiAutomation.Framework.Tests
     {
         EmployeesService employeesService;
 
+        protected override void ConfigureServices(IServiceCollection services)
+        {
+            base.ConfigureServices(services);
+            services.AddTransient<EmployeesService>();
+        }
+
         [OneTimeSetUp]
         public override void GlobalSetup()
         {
             base.GlobalSetup();
-            var serviceLogger = LoggerFactory.CreateLogger<EmployeesService>();
 
-            employeesService = new EmployeesService(client, Settings, serviceLogger);
+            employeesService = ServiceProvider.GetService<EmployeesService>();
 
         }
         
@@ -23,6 +29,7 @@ namespace atp.ApiAutomation.Framework.Tests
         {
             var response = await employeesService.GetAllEmployees();
             // add assertions
+          
         }
 
         // get all employee ids and use them in test cases

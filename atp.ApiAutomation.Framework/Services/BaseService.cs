@@ -11,7 +11,7 @@ namespace atp.ApiAutomation.Framework.Services
 {
     public class BaseService
     {
-        public RestClient client;
+        protected readonly RestClient client;
         protected readonly ILogger<BaseService> logger;
         protected readonly ApiSettings settings;
 
