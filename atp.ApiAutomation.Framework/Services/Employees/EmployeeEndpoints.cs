@@ -5,7 +5,7 @@
         public const string Employees = "/api/v1/employees";
         // get
 
-        public const string EmployeeById = "/api/v1/employee/{id}";
+        public const string EmployeeById = "/api/v1/employees/{id}";
         // get, put, delete
 
 
