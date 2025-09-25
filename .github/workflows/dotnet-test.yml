@@ -49,3 +49,15 @@ jobs:
         env:
           ApiSettings__API_USERNAME: ${{secrets.API_USERNAME}}
           ApiSettings__API_PASSWORD: ${{secrets.API_PASSWORD}}
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Extent Report Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./atp.ApiAutomation.Framework/bin/Debug/net8.0/TestReport
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
