@@ -12,6 +12,11 @@ env:
 jobs:
   run-tests:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Needed for uploading artifacts and other file operations
+      pages: write    # Needed for deploying to GitHub Pages
+      id-token: write
+      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
