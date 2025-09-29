@@ -21,22 +21,6 @@ namespace atp.ApiAutomation.Framework.Tests
         public async Task GetAllEmployeesWithAuth() 
         {
 
-
-            Console.WriteLine($"Username from settings: {settings.API_USERNAME}");
-            Console.WriteLine($"Password from settings: {settings.API_PASSWORD}");
-            Console.WriteLine($"Host from settings: {settings.Host}");
-            IDictionary environmentVariables = Environment.GetEnvironmentVariables();
-
-            Console.WriteLine("--- System Environment Variables ---");
-
-            // Iterate through each variable and print its key and value
-            foreach (DictionaryEntry variable in environmentVariables)
-            {
-                Console.WriteLine($"{variable.Key} = {variable.Value}");
-            }
-
-            Console.WriteLine("------------------------------------");
-
             var response = await simulateService.GetAllEmployees();
 
             // tests
