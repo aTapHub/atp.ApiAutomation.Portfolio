@@ -1,24 +1,49 @@
-﻿using AventStack.ExtentReports;
+﻿using atp.ApiAutomation.Framework.Configurations;
+using atp.ApiAutomation.Framework.Tests;
+using AventStack.ExtentReports;
 using AventStack.ExtentReports.Reporter;
+using Microsoft.Extensions.Configuration;
+using NUnit.Framework;
+using Serilog;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 
 namespace atp.ApiAutomation.Framework
 {
     [SetUpFixture]
     public class SetupFixture
     {
+        public static IConfigurationRoot Configuration { get; private set; }
         public static ExtentReports Extent { get; set; }
 
         private static readonly string reportDirectory
             = Path.Combine(TestContext.CurrentContext.TestDirectory, "TestReport");
 
-        [OneTimeSetUp]
-        public void Setup() { 
         
+
+        [OneTimeSetUp]
+        public void SetupConfig() {
+
+            //Configuration builder from multiple sources :
+            //appSettings.json, environment variables, user secrets
+
+            Configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .AddUserSecrets<BaseTest>(optional: true)
+                .Build();
+
+
+            
+            // Logging configuration
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.File("logs/test-run.log", rollingInterval: RollingInterval.Day)
+                .CreateLogger();
+
+
+            // Extent Report setup 
+
             if (Directory.Exists(reportDirectory) )
                 {
                 Directory.Delete(reportDirectory, true);
@@ -39,6 +64,9 @@ namespace atp.ApiAutomation.Framework
         [OneTimeTearDown]
         public void TearDown() 
         {
+            
+            Log.CloseAndFlush();
+
             Extent.Flush();
         }   
 

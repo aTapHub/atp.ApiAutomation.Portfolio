@@ -6,51 +6,27 @@ using Microsoft.Extensions.Logging;
 using RestSharp;
 using Serilog;
 using Serilog.Events;
+using NUnit.Framework;
 
+//[assembly: Parallelizable(ParallelScope.All)]
+[assembly: LevelOfParallelism(4)]
 namespace atp.ApiAutomation.Framework.Tests
 {
-    public class BaseTest
+    public class BaseTest : IDisposable
     {
-        public static IConfigurationRoot Configuration { get; private set; }
-        public static ILoggerFactory LoggerFactory { get; private set; }
-        public static ApiSettings Settings { get; private set; }
-        public RestClient client;
         public IServiceProvider ServiceProvider { get; set; }
-        public ExtentTest Test { get; set; }
 
+        protected ExtentTest Test { get; set; }
 
-        [OneTimeSetUp]
-        public virtual void GlobalSetup()
+        public BaseTest()
         {
-
-            //Configuration builder from multiple sources :
-            //appSettings.json, environment variables, user secrets
-
-            Configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddEnvironmentVariables()
-                .AddUserSecrets<BaseTest>(optional: true)
-                .Build();
-
-            
-            Configuration.GetSection("ApiSettings").Bind(Settings);
-
-
-            // Logging configuration
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.File("logs/test-run.log", rollingInterval: RollingInterval.Day)
-                .CreateLogger();
-
-
             // Setup a service provider - this will incorporate all needed services
             var services = new ServiceCollection();
             ConfigureServices(services);
-
-
+            ConfigureFixtureServices(services);
             ServiceProvider = services.BuildServiceProvider();
-
         }
+
 
         [SetUp]
         public void Setup()
@@ -85,22 +61,6 @@ namespace atp.ApiAutomation.Framework.Tests
         }
 
 
-
-        [OneTimeTearDown]
-        public void GlobalTearDown()
-        {
-            //client.Dispose();
-            Log.CloseAndFlush();
-
-
-            // iterate through instances if ServiceProvider, see if they are disposable
-            //and dispose them
-            if (ServiceProvider is IDisposable disposableProvider)
-            {
-                disposableProvider.Dispose();
-            }
-        }
-
         protected virtual void ConfigureServices(IServiceCollection services)
         {
 
@@ -108,16 +68,49 @@ namespace atp.ApiAutomation.Framework.Tests
 
             services.AddLogging(builder => builder.AddSerilog(Log.Logger));
 
-            services.AddSingleton<IConfiguration>(Configuration);
+            services.AddSingleton<IConfiguration>(SetupFixture.Configuration);
 
-            services.AddSingleton<ApiSettings>(provider => provider.GetRequiredService<IConfiguration>().GetSection("ApiSettings").Get<ApiSettings>());
+            services.AddScoped<ApiSettings>(provider => provider.GetRequiredService<IConfiguration>().GetSection("ApiSettings").Get<ApiSettings>());
 
-
-            services.AddSingleton(provider => {
+            services.AddScoped(provider =>
+            {
                 var settings = provider.GetRequiredService<ApiSettings>();
                 return new RestClient(settings.Host);
             });
 
+        }
+
+        protected virtual void ConfigureFixtureServices(IServiceCollection services)
+        {
+            // Register per-fixture services here in derived classes
+        }
+
+
+        [OneTimeTearDown] 
+        public void FixtureTearDown()
+        {
+            // Calling Dispose() triggers the cleanup of the ServiceProvider
+            // which in turn cleans up all scoped IDisposable services (like RestClient).
+            Dispose();
+        }
+
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // Dispose of the per-fixture service provider
+                if (ServiceProvider is IDisposable disposableProvider)
+                {
+                    disposableProvider.Dispose();
+                }
+            }
         }
     }
 }
