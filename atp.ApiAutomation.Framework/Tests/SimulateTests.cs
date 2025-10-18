@@ -6,23 +6,22 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using System.Collections.Generic;
-using System.Net; // For HttpStatusCode
+using System.Net;
 using System.Threading.Tasks;
 
 namespace atp.ApiAutomation.Framework.Tests
 {
     [TestFixture]
     [Parallelizable(ParallelScope.Fixtures)]
-    public class SimulateTests : SimulateBaseTests
+    public class SimulateTests : BaseTest
     {       
         private ApiSettings _settings;
+        private SimulateService _simulateService;
+        private Logger<SimulateTests> _logger;
  
+        public SimulateTests() 
         
-        [OneTimeSetUp]
-        public void ResolveServices()
         {
-            // Retrieve ApiSettings manually from the ServiceProvider inherited from BaseTest.
-            _settings = ServiceProvider.GetRequiredService<ApiSettings>();
         }
 
         [Test]

@@ -11,20 +11,16 @@ namespace atp.ApiAutomation.Framework.Tests
     [Parallelizable(ParallelScope.All)]
     public class EmployeeEndpointTests : BaseTest
     {
-        EmployeesService employeesService;
-        Logger<EmployeeEndpointTests> logger;
+        
+        private EmployeesService employeesService;
+        private ILogger<EmployeeEndpointTests> logger;
 
         public EmployeeEndpointTests() : base()
         {
-            employeesService = ServiceProvider.GetRequiredService<EmployeesService>();
-            logger = (Logger<EmployeeEndpointTests>?)ServiceProvider.GetRequiredService<ILogger<EmployeeEndpointTests>>();
+            employeesService = GetService<EmployeesService>();           
+            logger = GetService<ILogger<EmployeeEndpointTests>>();
         }
 
-        protected override void ConfigureFixtureServices(IServiceCollection services)
-        {            
-            services.AddTransient<EmployeesService>();
-      
-        }
 
 
         [Test]

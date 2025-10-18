@@ -12,7 +12,7 @@ using NUnit.Framework;
 [assembly: LevelOfParallelism(4)]
 namespace atp.ApiAutomation.Framework.Tests
 {
-    public class BaseTest : IDisposable
+    public class BaseTest
     {
         public IServiceProvider ServiceProvider { get; set; }
 
@@ -20,17 +20,20 @@ namespace atp.ApiAutomation.Framework.Tests
 
         public BaseTest()
         {
-            // Setup a service provider - this will incorporate all needed services
-            var services = new ServiceCollection();
-            ConfigureServices(services);
-            ConfigureFixtureServices(services);
-            ServiceProvider = services.BuildServiceProvider();
+          
+        }
+
+        protected T GetService<T>() where T : notnull
+        {
+            // This is the key line: it uses the static provider built once for the entire assembly.
+            return SetupFixture.ServiceProvider.GetRequiredService<T>();
         }
 
 
         [SetUp]
         public void Setup()
         {
+            // Standard NUnit Setup for Extent Reporting
             Test = SetupFixture.Extent.CreateTest(TestContext.CurrentContext.Test.Name);
         }
 
@@ -61,56 +64,5 @@ namespace atp.ApiAutomation.Framework.Tests
         }
 
 
-        protected virtual void ConfigureServices(IServiceCollection services)
-        {
-
-            // Register services for Depencency Injection container
-
-            services.AddLogging(builder => builder.AddSerilog(Log.Logger));
-
-            services.AddSingleton<IConfiguration>(SetupFixture.Configuration);
-
-            services.AddScoped<ApiSettings>(provider => provider.GetRequiredService<IConfiguration>().GetSection("ApiSettings").Get<ApiSettings>());
-
-            services.AddScoped(provider =>
-            {
-                var settings = provider.GetRequiredService<ApiSettings>();
-                return new RestClient(settings.Host);
-            });
-
-        }
-
-        protected virtual void ConfigureFixtureServices(IServiceCollection services)
-        {
-            // Register per-fixture services here in derived classes
-        }
-
-
-        [OneTimeTearDown] 
-        public void FixtureTearDown()
-        {
-            // Calling Dispose() triggers the cleanup of the ServiceProvider
-            // which in turn cleans up all scoped IDisposable services (like RestClient).
-            Dispose();
-        }
-
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                // Dispose of the per-fixture service provider
-                if (ServiceProvider is IDisposable disposableProvider)
-                {
-                    disposableProvider.Dispose();
-                }
-            }
-        }
     }
 }
