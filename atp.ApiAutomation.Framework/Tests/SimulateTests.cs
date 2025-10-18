@@ -19,10 +19,12 @@ namespace atp.ApiAutomation.Framework.Tests
         private SimulateService _simulateService;
         private Logger<SimulateTests> _logger;
  
-        public SimulateTests() 
-        
-        {
+        public SimulateTests() : base() 
+        { 
+            _simulateService = GetService<SimulateService>();
         }
+        
+        
 
         [Test]
         public async Task GetAllEmployeesWithAuth()
