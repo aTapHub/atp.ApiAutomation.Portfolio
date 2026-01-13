@@ -1,49 +1,59 @@
-# atp.ApiAutomation.Portfolio
-ApiAutomation Framework Portfolio
+ApiAutomation.Portfolio
+This repository contains a C#/.NET API test automation framework designed to demonstrate multiple approaches to parallelization and dependency injection.
 
-This is an API test automation framework written in C#/.NET that explores various parallelization techniques and demonstrates good coding practices.
+Parallelization & Branch Strategy
+The project is split into three branches to showcase different architectural trade-offs regarding concurrency and resource management.
 
-The parallelization approaches are implemented in the branches described below:
+1. Sequential Execution (main)
+The baseline implementation. Test fixtures and individual tests run one after another on a single thread.
 
-main: No parallelization — test fixtures and tests run sequentially.
+2. Fixture-Level Parallelization (functional/add_parallelization)
+Fixtures run concurrently on separate worker threads (defaulting to 4).
 
-functional/add_parallelization: 
-Parallelization at the fixture level — fixtures execute concurrently on separate worker threads (up to 4 threads), while tests inside each fixture run sequentially. 
-Disadvantage: fixtures cannot share in-memory data (for example, the TokenBucket) because each fixture builds and uses its own dependency injection ServiceProvider. 
-Advantage: services are created and disposed by fixtures only when needed, so unused services do not remain in memory. This architecture is appropriate when rate limiting is not a concern and any intermediary proxy does not return HTTP 429 (Too Many Requests).
+Architecture: Each fixture builds its own ServiceProvider.
 
-functional/add_rate_limiter: 
-Also fixture-level parallelization, but the ServiceCollection is configured in SetupFixture and a shared ServiceProvider is used across fixtures. 
-Disadvantage: API service instances may remain in memory for the duration of the run. 
-Advantage: fixtures (running on different threads) can share resources — primarily a token-bucket rate limiter — which helps avoid HTTP 429 (Too Many Requests) from intermediary proxies 
+Advantage: High memory efficiency; services are created and disposed of only when the fixture is active.
 
+Disadvantage: Lack of shared state. Cross-fixture utilities (like a global TokenBucket) cannot share data because they reside in different DI containers.
 
-Libraries: RestSharp, NUnit, Newtonsoft.Json, FluentAssertions, Serilog, Microsoft.Extensions.Configuration, Bogus.
-Project Layout:
-Configurations — configuration model(s).
-Models — DTOs used by services/tests.
-Services — service layer and endpoint descriptions.
-Tests — NUnit test classes.
-Utils — helper utilities (e.g., TokenBucket).
-Service Layer:
-Endpoints: Endpoint definitions and URL constants live in endpoint classes such as EmployeeEndpoints.cs.
-Service Implementation: Reusable HTTP wrappers and request helpers are in BaseService and concrete services like EmployeesService.cs.
-Tests Layer:
-Base Tests: Shared setup/teardown and common test helpers live in BaseTest.cs.
-Endpoint Tests: Endpoint-focused tests such as EmployeesEndpointTests.cs and SimulateTests.cs.
-Parallelization Strategy:
-NUnit Parallel Support: The suite is designed to run tests in parallel using NUnit's parallelization features (test-level configuration or attributes) and CI orchestration via dotnet-test.yml.
-Rate/Concurrency Control: A TokenBucket utility in TokenBucket.cs provides request throttling to prevent overload when many tests run concurrently.
-Test Isolation: Tests target isolated data per test run (fixtures / generated data) to avoid inter-test interference and enable safe concurrency.
-Good Coding Practices Followed:
-Separation of Concerns: Clear split between Services (API interactions), Models (payloads), and Tests (assertions).
-DRY & Reuse: BaseService and BaseTest centralize common logic and setup.
-Config-driven: appsettings.json + ApiSettings.cs for environment/config separation.
-Deterministic Test Data: Use of Bogus for predictable test data generation.
-Expressive Assertions: FluentAssertions for readable, maintainable assertions.
-Logging & Observability: Serilog integration for structured logs during test runs.
-CI Integration: Dotnet test in CI with runsettings and workflow defined at dotnet-test.yml.
-Small Focused Tests: Tests are endpoint-focused and fast, promoting reliable parallel runs.
+Best Use Case: High-speed execution where rate limiting is handled by the server or a proxy.
+
+3. Shared Provider Parallelization (functional/add_rate_limiter)
+Fixtures run concurrently but share a single ServiceProvider initialized in a SetupFixture.
+
+Architecture: A singleton ServiceCollection is shared across the entire run.
+
+Advantage: Enables global resource management. This allows the TokenBucket rate limiter to effectively throttle requests across all threads to avoid HTTP 429 errors.
+
+Disadvantage: API service instances may persist in memory for the duration of the entire test suite execution.
+
+Technical Stack
+Core: .NET with NUnit as the test runner.
+
+Rest Client: RestSharp for API interactions.
+
+Data & Validation: FluentAssertions for readable checks and Bogus for deterministic data generation.
+
+Infrastructure: Serilog (Logging) and Microsoft.Extensions.Configuration (Environment Management).
+
+Project Architecture
+Service Layer
+Endpoints: EmployeeEndpoints.cs contains URL constants and route definitions.
+
+Implementation: BaseService.cs provides a reusable wrapper for HTTP requests, extended by concrete classes like EmployeesService.cs.
+
+Test Layer
+BaseTest.cs: Handles the core setup, teardown, and common helper methods.
+
+Endpoint Tests: Logical groupings of tests (e.g., EmployeesEndpointTests.cs) focused on specific API domains.
+
+Utilities
+TokenBucket.cs: A custom utility providing request throttling logic to manage concurrency limits.
+
+Implementation Highlights
+Config-Driven: Uses appsettings.json and ApiSettings.cs for environment-specific configurations.
+
+Test Isolation: Ensures each test uses unique generated data to prevent race conditions during parallel runs.
 
 -------
 
