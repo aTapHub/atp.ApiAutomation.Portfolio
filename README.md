@@ -5,7 +5,7 @@ This repository contains a C#/.NET API test automation framework designed to dem
 ---
 
 ## Parallelization & Branch Strategy
-The project is split into three branches to showcase different architectural trade-offs regarding concurrency and resource management.
+The project is split into three branches that explore different architectural trade-offs regarding concurrency and resource management.
 
 ### 1. Sequential Execution (`main`)
 The baseline implementation. Test fixtures and individual tests run one after another on a single thread.
