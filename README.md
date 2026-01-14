@@ -30,6 +30,7 @@ Fixtures run concurrently but share a single `ServiceProvider` initialized in a 
 ```text
 atp.ApiAutomation.Portfolio/
 ├── Configurations/  # Mapping appsettings.json to C# POCOs
+├── Data/            # Test data generation
 ├── Models/          # DTOs (Data Transfer Objects) for API Payloads
 ├── Services/        # API Client Logic (BaseService & Concrete Implementations)
 ├── Tests/           # NUnit Test Suites & BaseTest setup
