@@ -2,14 +2,15 @@
 using atp.ApiAutomation.Framework.Models;
 using atp.ApiAutomation.Framework.Utils;
 using Microsoft.Extensions.Logging;
+using Polly;
 using RestSharp;
 using System.Text.Json;
 
 namespace atp.ApiAutomation.Framework.Services.Employees
 {
     public class EmployeesService(RestClient client, ApiSettings settings,
-       ILogger<EmployeesService> logger, TokenBucket rateLimiter)
-       : BaseService(client, settings, logger, rateLimiter)
+       ILogger<EmployeesService> logger, TokenBucket rateLimiter, AsyncPolicy policy)
+       : BaseService(client, settings, logger, rateLimiter, policy)
     {
         public async Task<RestResponse> GetAllEmployees(CancellationToken ct = default) 
         { 

@@ -80,6 +80,9 @@ namespace atp.ApiAutomation.Framework
 
             services.AddSingleton<IConfiguration>(Configuration);
 
+            var resiliencePolicy = ResiliencePolicies.CreateDefaultPolicy();
+            services.AddSingleton(resiliencePolicy);
+
             services.AddSingleton<TokenBucket>(new TokenBucket(capacity: 5, refillRate: 10));
 
             services.AddTransient<ApiSettings>(provider => provider.GetRequiredService<IConfiguration>().GetSection(nameof(ApiSettings)).Get<ApiSettings>());

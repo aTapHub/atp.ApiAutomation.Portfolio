@@ -2,13 +2,14 @@
 using atp.ApiAutomation.Framework.Utils;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using Polly;
 using RestSharp;
 
 namespace atp.ApiAutomation.Framework.Services.Simulate
 {
     public class SimulateService(ApiSettings apiSettings, RestClient client,
-                        ILogger<SimulateService> logger, TokenBucket rateLimiter) : 
-        BaseService(client, apiSettings, logger, rateLimiter)
+                        ILogger<SimulateService> logger, TokenBucket rateLimiter, AsyncPolicy policy) : 
+        BaseService(client, apiSettings, logger, rateLimiter, policy)
     {
         public async Task<string> GetToken() 
         { 
