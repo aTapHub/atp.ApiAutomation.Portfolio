@@ -40,9 +40,17 @@ atp.ApiAutomation.Portfolio/
 
 -------
 Here is the core schematic on how the Test and Api Services layers interact on sequential mode - main branch:
-
+Inside TestClass constructor the api service needed for that TestFixture class is added into the service collection.
+It is then retreived in the same TestClass but in the [OneTimeSetup] method. The .net service collection manges the ApiService lifetime.
 
 <img width="691" height="761" alt="Api Framework drawio" src="https://github.com/user-attachments/assets/6e33412e-f464-4a1d-ab78-93bd372515c6" />
+
+
+
+Below shows how the dependency injection mechanism works for the implementation that uses parallelization. In this case, all the services are added to the ServiceCollection inside the SetupFixture, that runs once per suite run.
+TestBase, TestClasses, BaseService, ApiServices run as maby times as there are TestFixtures.
+
+<img width="1376" height="1222" alt="image" src="https://github.com/user-attachments/assets/e458b9f7-1dc4-4a17-809d-10c7c6706f9c" />
 
 
 ----------------------------------------
