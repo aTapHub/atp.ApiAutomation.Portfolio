@@ -10,17 +10,20 @@ The project is split into three branches that explore different architectural tr
 ### 1. Sequential Execution (`main`)
 The baseline implementation. Test fixtures and individual tests run one after another on a single thread.
 
-### 2. Fixture-Level Parallelization (`functional/add_parallelization`)
-Fixtures run concurrently on separate worker threads (defaulting to 4).
-* **Architecture:** Each fixture builds its own `ServiceProvider`.
-* **Advantage:** High memory efficiency; services are created and disposed of only when the fixture is active.
-* **Disadvantage:** Lack of shared state. Cross-fixture utilities (like a global `TokenBucket`) cannot share data because they reside in different DI containers.
-* **Best Use Case:** High-speed execution where rate limiting is handled by the server or a proxy.
+### 2. Fixture-Level Parallelization (`functional/add_paralelization`)
+Fixtures run concurrently on separate worker threads (defaulting to 4); `[Parallelizable(ParallelScope.Fixtures)]` keeps the tests *inside* a given fixture sequential.
 
-### 3. Shared Provider Parallelization (`functional/add_rate_limiter`)
-Fixtures run concurrently but share a single `ServiceProvider` initialized in a `SetupFixture`.
-* **Architecture:** A singleton `ServiceCollection` is shared across the entire run.
-* **Advantage:** Enables global resource management. This allows the **TokenBucket** rate limiter to effectively throttle requests across all threads to avoid `HTTP 429` errors.
+This branch originally gave each fixture its own `ServiceProvider`, built inside the fixture's own constructor. That design turned out to be incompatible with real parallel execution: NUnit reuses a single instance of a fixture class across all of its test methods by default, so anything using `ParallelScope.All` for method-level parallelism raced on that instance's shared fields (the Extent `Test` handle, resolved services) — corrupting the HTML report and occasionally throwing. Restricting parallelism to fixture-level removed the method-level race, but exposed the next problem: per-fixture containers can't share anything across fixtures, including the singletons (like `RestClient`) that are supposed to be reused rather than recreated per instance.
+
+* **Architecture (current):** A single `ServiceProvider` is built once in `SetupFixture`, before any fixture runs. `RestClient`/`ApiSettings`/logging are registered as singletons — safe to share, since concurrently running fixtures only read from them (RestClient/HttpClient are explicitly designed to be reused across concurrent calls). Fixture-specific services (`EmployeesService`, `SimulateService`) stay transient, so each fixture still gets its own instance.
+* **Advantage:** No isolation-related races; fixtures run in parallel safely without every fixture paying the cost of rebuilding config/logging/HTTP client setup.
+* **Disadvantage:** Because everything lives in one process-wide container, there's no built-in way to scope a resource (like a rate limiter) to a subset of fixtures — any cross-cutting concern that needs coordinating across all parallel work has to be a shared singleton itself.
+* **Best Use Case:** Parallel execution against a target that doesn't need active request throttling from the client side.
+
+### 3. Shared Provider + Rate Limiting (`functional/add_rate_limiter`)
+Builds on the same shared-`ServiceProvider`-in-`SetupFixture` foundation as branch 2, and adds a **TokenBucket** rate limiter and resilience policies on top.
+* **Architecture:** The single, shared `ServiceProvider` doubles as the natural place to host a process-wide `TokenBucket` singleton, so it can throttle requests across every parallel fixture.
+* **Advantage:** Enables global resource management — the `TokenBucket` effectively throttles requests across all threads to avoid `HTTP 429` errors.
 * **Disadvantage:** API service instances may persist in memory for the duration of the entire test suite execution.
 
 ---
