@@ -7,7 +7,7 @@ using RestSharp;
 namespace atp.ApiAutomation.Framework.Services.Simulate
 {
     public class SimulateService(ApiSettings apiSettings, RestClient client,
-                        ILogger<SimulateService> logger, RateLimiter rateLimiter) : BaseService(client, apiSettings, logger, rateLimiter)
+                        ILogger<SimulateService> logger, RateLimiter rateLimiter) : BaseService(client, apiSettings, logger, rateLimiter), ISimulateService
     {
         public async Task<string> GetToken()
         {

@@ -8,7 +8,7 @@ using System.Text.Json;
 namespace atp.ApiAutomation.Framework.Services.Employees
 {
     public class EmployeesService(RestClient client, ApiSettings settings,
-        ILogger<EmployeesService> logger, RateLimiter rateLimiter) : BaseService(client, settings, logger, rateLimiter)
+        ILogger<EmployeesService> logger, RateLimiter rateLimiter) : BaseService(client, settings, logger, rateLimiter), IEmployeesService
     {
         public async Task<RestResponse> GetAllEmployees(CancellationToken ct = default)
         {

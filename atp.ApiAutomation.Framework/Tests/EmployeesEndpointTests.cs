@@ -11,13 +11,13 @@ namespace atp.ApiAutomation.Framework.Tests
     [Parallelizable(ParallelScope.Fixtures)]
     public class EmployeeEndpointTests : BaseTest
     {
-        EmployeesService employeesService;
+        IEmployeesService employeesService;
         Logger<EmployeeEndpointTests> logger;
 
         [OneTimeSetUp]
         public void ResolveServices()
         {
-            employeesService = SetupFixture.ServiceProvider.GetRequiredService<EmployeesService>();
+            employeesService = SetupFixture.ServiceProvider.GetRequiredService<IEmployeesService>();
             logger = (Logger<EmployeeEndpointTests>?)SetupFixture.ServiceProvider.GetRequiredService<ILogger<EmployeeEndpointTests>>();
         }
 

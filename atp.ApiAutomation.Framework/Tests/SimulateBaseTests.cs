@@ -8,14 +8,14 @@ namespace atp.ApiAutomation.Framework.Tests
     public class SimulateBaseTests : BaseTest
     {
         // Fields are now protected (for derived classes) and non-readonly
-        protected SimulateService _simulateService;
+        protected ISimulateService _simulateService;
         protected ILogger<SimulateBaseTests> _logger;
 
         [OneTimeSetUp]
         public void ResolveBaseServices()
         {
             // Resolve the base services once per fixture, from the shared provider built in SetupFixture.
-            _simulateService = SetupFixture.ServiceProvider.GetRequiredService<SimulateService>();
+            _simulateService = SetupFixture.ServiceProvider.GetRequiredService<ISimulateService>();
             _logger = SetupFixture.ServiceProvider.GetRequiredService<ILogger<SimulateBaseTests>>();
         }
     }

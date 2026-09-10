@@ -68,8 +68,8 @@ namespace atp.ApiAutomation.Framework
             // so all fixtures running in parallel throttle against the same limit.
             services.AddSingleton(new RateLimiter(capacity: 5, refillInterval: TimeSpan.FromSeconds(1)));
 
-            services.AddTransient<EmployeesService>();
-            services.AddTransient<SimulateService>();
+            services.AddTransient<IEmployeesService, EmployeesService>();
+            services.AddTransient<ISimulateService, SimulateService>();
 
             ServiceProvider = services.BuildServiceProvider();
 
