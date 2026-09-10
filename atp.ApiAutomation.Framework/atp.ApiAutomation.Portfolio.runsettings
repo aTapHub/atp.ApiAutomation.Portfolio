@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <!-- Maximum number of test threads to use -->
+    <MaxCpuCount>4</MaxCpuCount>
+    <!-- Set to true to enable parallel test execution -->
+    <DisableParallelization>false</DisableParallelization>
+    <!-- Target framework for your tests -->
+    <TargetFrameworkVersion>net8.0</TargetFrameworkVersion>
+  </RunConfiguration>
+</RunSettings>
