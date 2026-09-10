@@ -1,5 +1,6 @@
 ﻿using atp.ApiAutomation.Framework.Configurations;
 using atp.ApiAutomation.Framework.Models;
+using atp.ApiAutomation.Framework.Utils;
 using Microsoft.Extensions.Logging;
 using RestSharp;
 using System.Text.Json;
@@ -7,13 +8,13 @@ using System.Text.Json;
 namespace atp.ApiAutomation.Framework.Services.Employees
 {
     public class EmployeesService(RestClient client, ApiSettings settings,
-        ILogger<EmployeesService> logger) : BaseService(client, settings, logger)
+        ILogger<EmployeesService> logger, RateLimiter rateLimiter) : BaseService(client, settings, logger, rateLimiter)
     {
-        public async Task<RestResponse> GetAllEmployees(CancellationToken ct = default) 
-        { 
+        public async Task<RestResponse> GetAllEmployees(CancellationToken ct = default)
+        {
             RestRequest request = new RestRequest(EmployeeEndpoints.Employees, Method.Get);
 
-            var response = await client.ExecuteAsync(request, ct);
+            var response = await ExecuteAsync(request, ct);
 
             if (response == null)
             {
@@ -28,7 +29,7 @@ namespace atp.ApiAutomation.Framework.Services.Employees
             var request = GetRequest(EmployeeEndpoints.EmployeeById, Method.Get);
             request.AddUrlSegment("id", id);
 
-            var response = await client.ExecuteAsync(request, ct);
+            var response = await ExecuteAsync(request, ct);
 
             if (response == null)
             {
@@ -43,7 +44,7 @@ namespace atp.ApiAutomation.Framework.Services.Employees
             var request = GetRequest(EmployeeEndpoints.Employees, Method.Post);
             request.AddJsonBody(JsonSerializer.Serialize(employee));
 
-            var response = await client.ExecuteAsync(request, ct);
+            var response = await ExecuteAsync(request, ct);
 
             if (response == null)
             {
@@ -59,7 +60,7 @@ namespace atp.ApiAutomation.Framework.Services.Employees
             request.AddUrlSegment("id", id);
             request.AddJsonBody(JsonSerializer.Serialize(employee));
 
-            var response = await client.ExecuteAsync(request, ct);
+            var response = await ExecuteAsync(request, ct);
 
             if (response == null)
             {
@@ -99,7 +100,7 @@ namespace atp.ApiAutomation.Framework.Services.Employees
         {
             var request = GetRequest(EmployeeEndpoints.EmployeeById, Method.Delete);
             request.AddUrlSegment("id", id);
-            return await client.ExecuteAsync(request, ct);
+            return await ExecuteAsync(request, ct);
         }
 
 

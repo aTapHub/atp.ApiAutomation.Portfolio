@@ -2,6 +2,7 @@
 using atp.ApiAutomation.Framework.Services.Employees;
 using atp.ApiAutomation.Framework.Services.Simulate;
 using atp.ApiAutomation.Framework.Tests;
+using atp.ApiAutomation.Framework.Utils;
 using AventStack.ExtentReports;
 using AventStack.ExtentReports.Reporter;
 using Microsoft.Extensions.Configuration;
@@ -62,6 +63,10 @@ namespace atp.ApiAutomation.Framework
 
             services.AddSingleton(provider =>
                 new RestClient(provider.GetRequiredService<ApiSettings>().Host));
+
+            // Shared rate limiter gate - one bucket of 5 tokens, refilled every second,
+            // so all fixtures running in parallel throttle against the same limit.
+            services.AddSingleton(new RateLimiter(capacity: 5, refillInterval: TimeSpan.FromSeconds(1)));
 
             services.AddTransient<EmployeesService>();
             services.AddTransient<SimulateService>();
