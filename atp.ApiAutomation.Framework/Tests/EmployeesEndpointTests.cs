@@ -8,22 +8,17 @@ using System.Net;
 namespace atp.ApiAutomation.Framework.Tests
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.All)]
+    [Parallelizable(ParallelScope.Fixtures)]
     public class EmployeeEndpointTests : BaseTest
     {
         EmployeesService employeesService;
         Logger<EmployeeEndpointTests> logger;
 
-        public EmployeeEndpointTests() : base()
+        [OneTimeSetUp]
+        public void ResolveServices()
         {
-            employeesService = ServiceProvider.GetRequiredService<EmployeesService>();
-            logger = (Logger<EmployeeEndpointTests>?)ServiceProvider.GetRequiredService<ILogger<EmployeeEndpointTests>>();
-        }
-
-        protected override void ConfigureFixtureServices(IServiceCollection services)
-        {            
-            services.AddTransient<EmployeesService>();
-      
+            employeesService = SetupFixture.ServiceProvider.GetRequiredService<EmployeesService>();
+            logger = (Logger<EmployeeEndpointTests>?)SetupFixture.ServiceProvider.GetRequiredService<ILogger<EmployeeEndpointTests>>();
         }
 
 

@@ -1,9 +1,13 @@
 ﻿using atp.ApiAutomation.Framework.Configurations;
+using atp.ApiAutomation.Framework.Services.Employees;
+using atp.ApiAutomation.Framework.Services.Simulate;
 using atp.ApiAutomation.Framework.Tests;
 using AventStack.ExtentReports;
 using AventStack.ExtentReports.Reporter;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using RestSharp;
 using Serilog;
 using System;
 using System.IO;
@@ -14,6 +18,7 @@ namespace atp.ApiAutomation.Framework
     public class SetupFixture
     {
         public static IConfigurationRoot Configuration { get; private set; }
+        public static IServiceProvider ServiceProvider { get; private set; }
         public static ExtentReports Extent { get; set; }
 
         private static readonly string reportDirectory
@@ -34,7 +39,7 @@ namespace atp.ApiAutomation.Framework
                 .Build();
 
 
-            
+
             // Logging configuration
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
@@ -42,7 +47,29 @@ namespace atp.ApiAutomation.Framework
                 .CreateLogger();
 
 
-            // Extent Report setup 
+            // Dependency injection container - built once and shared across all
+            // fixtures. RestClient/ApiSettings/logging are registered as singletons
+            // since they are safe to share across fixtures running in parallel;
+            // fixture services stay transient so each fixture gets its own instance.
+            var services = new ServiceCollection();
+
+            services.AddLogging(builder => builder.AddSerilog(Log.Logger));
+
+            services.AddSingleton<IConfiguration>(Configuration);
+
+            services.AddSingleton(provider =>
+                provider.GetRequiredService<IConfiguration>().GetSection("ApiSettings").Get<ApiSettings>());
+
+            services.AddSingleton(provider =>
+                new RestClient(provider.GetRequiredService<ApiSettings>().Host));
+
+            services.AddTransient<EmployeesService>();
+            services.AddTransient<SimulateService>();
+
+            ServiceProvider = services.BuildServiceProvider();
+
+
+            // Extent Report setup
 
             if (Directory.Exists(reportDirectory) )
                 {
@@ -62,13 +89,17 @@ namespace atp.ApiAutomation.Framework
         }
 
         [OneTimeTearDown]
-        public void TearDown() 
+        public void TearDown()
         {
-            
+            if (ServiceProvider is IDisposable disposableProvider)
+            {
+                disposableProvider.Dispose();
+            }
+
             Log.CloseAndFlush();
 
             Extent.Flush();
-        }   
+        }
 
     }
 }

@@ -21,8 +21,8 @@ namespace atp.ApiAutomation.Framework.Tests
         [OneTimeSetUp]
         public void ResolveServices()
         {
-            // Retrieve ApiSettings manually from the ServiceProvider inherited from BaseTest.
-            _settings = ServiceProvider.GetRequiredService<ApiSettings>();
+            // Retrieve ApiSettings from the shared provider built in SetupFixture.
+            _settings = SetupFixture.ServiceProvider.GetRequiredService<ApiSettings>();
         }
 
         [Test]
