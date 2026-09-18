@@ -1,0 +1,42 @@
+# Builds the framework image straight from git (no local build context needed)
+# and pushes it to Harbor under one fixed, mutable tag.
+#
+# Requires two things to already exist in the api-automation namespace,
+# created out of band (see k8s/README.md):
+#   - ConfigMap "harbor-ca": Harbor's public CA cert, key ca.crt
+#   - Secret "harbor-push-creds" (kubernetes.io/dockerconfigjson): a Harbor
+#     robot account scoped to push/pull on the "learning" project
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kaniko-build
+  namespace: api-automation
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: kaniko
+          image: ghcr.io/osscontainertools/kaniko:v1.28.4
+          args:
+            - --context=git://github.com/aTapHub/atp.ApiAutomation.Portfolio.git#refs/heads/main
+            - --dockerfile=Dockerfile
+            - --destination=192.168.0.139:30003/learning/api-automation-framework:latest
+            - --registry-certificate=192.168.0.139:30003=/kaniko/ssl/certs/ca.crt
+          volumeMounts:
+            - name: docker-config
+              mountPath: /kaniko/.docker
+            - name: harbor-ca
+              mountPath: /kaniko/ssl/certs
+      volumes:
+        - name: docker-config
+          secret:
+            secretName: harbor-push-creds
+            items:
+              - key: .dockerconfigjson
+                path: config.json
+        - name: harbor-ca
+          configMap:
+            name: harbor-ca
