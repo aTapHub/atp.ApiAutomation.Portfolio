@@ -24,12 +24,12 @@ spec:
             - --context=git://github.com/aTapHub/atp.ApiAutomation.Portfolio.git#refs/heads/main
             - --dockerfile=Dockerfile
             - --destination=192.168.0.139:30003/learning/api-automation-framework:latest
-            - --registry-certificate=192.168.0.139:30003=/kaniko/ssl/certs/ca.crt
+            - --registry-certificate=192.168.0.139:30003=/kaniko/harbor-ca/ca.crt
           volumeMounts:
             - name: docker-config
               mountPath: /kaniko/.docker
             - name: harbor-ca
-              mountPath: /kaniko/ssl/certs
+              mountPath: /kaniko/harbor-ca
       volumes:
         - name: docker-config
           secret:

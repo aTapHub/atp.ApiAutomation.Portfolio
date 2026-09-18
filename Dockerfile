@@ -1,13 +1,13 @@
+# Environment-only image: SDK + restored NuGet packages, no test source.
+# The test Job mounts the actual framework source fresh at run time (via an
+# initContainer git clone into a shared emptyDir) rather than baking it in
+# here, so code changes never require rebuilding this image - only a
+# Dockerfile or .csproj change does.
 FROM mcr.microsoft.com/dotnet/sdk:8.0
 
 WORKDIR /app
-
-# Copy just the csproj first so `dotnet restore`'s layer is cached by Kaniko
-# and only re-runs when a package reference actually changes.
 COPY atp.ApiAutomation.Framework/atp.ApiAutomation.Framework.csproj atp.ApiAutomation.Framework/
 RUN dotnet restore atp.ApiAutomation.Framework/atp.ApiAutomation.Framework.csproj
 
-COPY atp.ApiAutomation.Framework/ atp.ApiAutomation.Framework/
 WORKDIR /app/atp.ApiAutomation.Framework
-
 ENTRYPOINT ["dotnet", "test"]

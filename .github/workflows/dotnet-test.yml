@@ -12,58 +12,44 @@ env:
 
 jobs:
   run-tests:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write # Needed for uploading artifacts and other file operations
-      pages: write    # Needed for deploying to GitHub Pages
-      id-token: write
-      
+    runs-on: talos-runners
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/checkout@v4
         with:
-          dotnet-version: '8.0.x'
+          fetch-depth: 2 # need the previous commit to diff against below
 
-      - name: Start Application Under Test (AUT)
-        run: docker run -d --rm --name qa-practice-api -p8887:8081 rvancea/qa-practice-api:latest
-
-      - name: Wait for AUT to be ready
+      - name: Install kubectl
         run: |
-          echo "Waiting for AUT to start..."
-          until curl -s http://localhost:8887/swagger/index.html > /dev/null; do
-            sleep 1
-          done
-          echo "AUT is ready!"
-      
-      - name: Data Generation Stage
-        run: echo "Data generation stage is currently empty."
+          curl -LO "https://dl.k8s.io/release/v1.37.0/bin/linux/amd64/kubectl"
+          install -m 0755 kubectl /usr/local/bin/kubectl
+          kubectl version --client
 
-      - name: Restore dependencies
-        run: dotnet restore ./atp.ApiAutomation.Framework/atp.ApiAutomation.Framework.sln
+      - name: Reconcile namespace and RBAC
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/rbac.yaml
 
-      - name: Build the solution
-        run: dotnet build ./atp.ApiAutomation.Framework/atp.ApiAutomation.Framework.sln
+      - name: Check whether the framework image needs rebuilding
+        id: image-deps
+        run: |
+          if git diff --quiet HEAD^ HEAD -- Dockerfile atp.ApiAutomation.Framework/atp.ApiAutomation.Framework.csproj; then
+            echo "Dockerfile and .csproj unchanged since last commit, skipping rebuild."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Dockerfile or .csproj changed, rebuild needed."
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Debug secrets
-        run: echo ${{secrets.API_USERNAME}} ${{secrets.API_PASSWORD}}
+      - name: Build and push framework image (Kaniko)
+        if: steps.image-deps.outputs.changed == 'true'
+        run: |
+          kubectl delete job kaniko-build -n api-automation --ignore-not-found
+          kubectl apply -f k8s/kaniko-build-job.yaml
+          kubectl wait --for=condition=complete job/kaniko-build -n api-automation --timeout=10m || \
+            (kubectl logs job/kaniko-build -n api-automation; exit 1)
+          kubectl logs job/kaniko-build -n api-automation
 
-      - name: Run tests
-        run: dotnet test ./atp.ApiAutomation.Framework/atp.ApiAutomation.Framework.sln
-        env:
-          ApiSettings__API_USERNAME: ${{secrets.API_USERNAME}}
-          ApiSettings__API_PASSWORD: ${{secrets.API_PASSWORD}}
-      
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload Extent Report Artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./atp.ApiAutomation.Framework/bin/Debug/net8.0/TestReport
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      # AUT deployment, the test Job itself, and report retrieval are not
+      # wired up yet - next step in the migration to the Talos cluster.
