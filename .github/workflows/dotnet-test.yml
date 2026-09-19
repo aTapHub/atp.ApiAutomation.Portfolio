@@ -28,10 +28,12 @@ jobs:
           echo "$HOME/bin" >> "$GITHUB_PATH"
           "$HOME/bin/kubectl" version --client
 
-      - name: Reconcile namespace and RBAC
-        run: |
-          kubectl apply -f k8s/namespace.yaml
-          kubectl apply -f k8s/rbac.yaml
+      # Namespace and RBAC are one-time cluster setup applied by an admin
+      # kubeconfig (see k8s/README.md) - the runner's own ServiceAccount is
+      # deliberately not permitted to touch either (Namespace is cluster-
+      # scoped, and letting a "no-permission" identity manage its own RBAC
+      # would defeat the point of least-privilege), so this can't and
+      # shouldn't be reconciled from inside the pipeline itself.
 
       - name: Check whether the framework image needs rebuilding
         id: image-deps
