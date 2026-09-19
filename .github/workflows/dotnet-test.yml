@@ -13,6 +13,10 @@ env:
 jobs:
   run-tests:
     runs-on: talos-runners
+    permissions:
+      contents: write # Needed for uploading artifacts and other file operations
+      pages: write    # Needed for deploying to GitHub Pages
+      id-token: write
 
     steps:
       - name: Checkout repository
@@ -62,10 +66,67 @@ jobs:
           kubectl wait --for=condition=available deploy/qa-practice-api -n api-automation --timeout=180s || \
             (kubectl describe deploy/qa-practice-api -n api-automation; exit 1)
 
-      # The test Job itself and report retrieval are not wired up yet - next
-      # step in the migration to the Talos cluster.
+      - name: Set test credentials
+        run: |
+          kubectl create secret generic api-creds -n api-automation \
+            --from-literal=API_USERNAME="$API_USERNAME" \
+            --from-literal=API_PASSWORD="$API_PASSWORD" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Run tests
+        id: run-tests
+        run: |
+          kubectl delete job run-tests -n api-automation --ignore-not-found
+          kubectl apply -f k8s/test-workspace-pvc.yaml
+          kubectl apply -f k8s/test-job.yaml
+
+          for i in $(seq 1 180); do
+            succeeded=$(kubectl get job run-tests -n api-automation -o jsonpath='{.status.succeeded}')
+            failed=$(kubectl get job run-tests -n api-automation -o jsonpath='{.status.failed}')
+            [ "$succeeded" = "1" ] || [ "$failed" = "1" ] && break
+            sleep 5
+          done
+
+          kubectl logs job/run-tests -n api-automation --all-containers
+
+          if [ "$(kubectl get job run-tests -n api-automation -o jsonpath='{.status.succeeded}')" = "1" ]; then
+            echo "passed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "passed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Retrieve test report
+        if: always()
+        run: |
+          kubectl apply -f k8s/report-retrieval-pod.yaml
+          kubectl wait --for=condition=ready pod/report-retrieval -n api-automation --timeout=60s
+          kubectl cp api-automation/report-retrieval:/app/atp.ApiAutomation.Framework/bin/Debug/net8.0/TestReport ./TestReport -c retrieval
+
+      - name: Clean up test resources
+        if: always()
+        run: |
+          kubectl delete -f k8s/report-retrieval-pod.yaml -f k8s/test-workspace-pvc.yaml --ignore-not-found
 
       - name: Tear down Application Under Test
         if: always()
         run: |
           kubectl delete -f k8s/aut-deployment.yaml -f k8s/aut-service.yaml --ignore-not-found
+
+      - name: Setup Pages
+        if: always()
+        uses: actions/configure-pages@v4
+
+      - name: Upload Extent Report Artifact
+        if: always()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./TestReport
+
+      - name: Deploy to GitHub Pages
+        if: always()
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Fail the workflow if tests failed
+        if: steps.run-tests.outputs.passed != 'true'
+        run: exit 1

@@ -52,3 +52,6 @@ Copilot indices
 *.db
 *.db-shm
 *.db-wal
+# CI report retrieval (dotnet-test.yml)
+TestReport-latest/
+/TestReport/
