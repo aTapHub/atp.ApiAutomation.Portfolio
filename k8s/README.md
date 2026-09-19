@@ -55,3 +55,38 @@ Note: `namespace.yaml` and `rbac.yaml` are one-time admin setup, not something
 the pipeline itself re-applies - see above. If `rbac.yaml` changes (e.g. to add
 permissions for the AUT's Deployment/Service), re-run its `kubectl apply` here
 with an admin kubeconfig.
+
+## Run tests
+
+Requires `api-creds` (one-time admin setup, alongside the Secrets above):
+
+```powershell
+kubectl -n api-automation create secret generic api-creds `
+  --from-literal=API_USERNAME='<value>' `
+  --from-literal=API_PASSWORD='<value>'
+```
+
+```powershell
+kubectl apply -f k8s/test-workspace-pvc.yaml
+kubectl apply -f k8s/test-job.yaml
+kubectl wait --for=condition=complete job/run-tests -n api-automation --timeout=15m
+```
+
+The test Job clones the repo fresh (an initContainer, into `test-workspace-pvc`)
+and mounts it into the environment-only image built above - code changes never
+need an image rebuild, only Dockerfile/`.csproj` changes do (see the
+Dockerfile's own comment).
+
+**Retrieving the report**: a Job's pod is gone the instant its container exits,
+so `kubectl cp`/`exec` have nothing left to talk to directly by the time the
+Job shows complete. Mount the same PVC into a short-lived Pod instead:
+
+```powershell
+kubectl apply -f k8s/report-retrieval-pod.yaml
+kubectl wait --for=condition=ready pod/report-retrieval -n api-automation --timeout=60s
+kubectl cp api-automation/report-retrieval:/app/atp.ApiAutomation.Framework/bin/Debug/net8.0/TestReport ./TestReport-latest -c retrieval
+kubectl delete -f k8s/report-retrieval-pod.yaml -f k8s/test-workspace-pvc.yaml
+```
+
+On Windows, run `kubectl cp` from PowerShell, not Git Bash - MSYS rewrites the
+`namespace/pod:path` argument as if it were a filesystem path and mangles it.

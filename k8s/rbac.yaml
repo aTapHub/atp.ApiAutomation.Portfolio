@@ -13,7 +13,7 @@ rules:
     verbs: ["create", "get", "list", "watch", "delete"]
   - apiGroups: [""]
     resources: ["pods"]
-    verbs: ["get", "list", "watch"]
+    verbs: ["create", "get", "list", "watch", "delete"] # create/delete: the report-retrieval Pod
   - apiGroups: [""]
     resources: ["pods/log"]
     verbs: ["get"]
@@ -23,6 +23,26 @@ rules:
   - apiGroups: [""]
     resources: ["services"]
     verbs: ["create", "get", "list", "watch", "delete", "patch"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"] # needed for `kubectl cp` (implemented over exec) to pull the test report out
+  # Scoped to one named Secret so the runner can inject API_USERNAME/PASSWORD
+  # into the test Job without being able to read harbor-push-creds or
+  # harbor-ca. Caveat: Kubernetes RBAC's resourceNames restriction doesn't
+  # apply to "create" (the object doesn't exist yet at authorization time),
+  # so this grants create on any Secret name in this namespace - but get/
+  # patch/delete stay locked to api-creds specifically, so it can't read or
+  # modify either of the other two Secrets.
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["api-creds"]
+    verbs: ["get", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["create", "get", "list", "watch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

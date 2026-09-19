@@ -1,0 +1,66 @@
+# Runs the test suite against the AUT. Mirrors the "environment image, code
+# mounted fresh at run time" pattern: an initContainer clones the repo into a
+# shared PersistentVolumeClaim (test-workspace-pvc.yaml - apply that first),
+# and the main container - built from the environment-only image pushed by
+# kaniko-build-job.yaml - mounts that same volume at /app, so it finds source
+# at exactly the path its WORKDIR/ENTRYPOINT expect.
+#
+# Requires "api-creds" (see k8s/README.md) with keys API_USERNAME/API_PASSWORD.
+# The report is retrieved afterward via report-retrieval-pod.yaml, which
+# mounts the same PVC - this Job's own pod is gone by the time its container
+# exits, so there's nothing left for kubectl cp to talk to directly.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: run-tests
+  namespace: api-automation
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+        - name: harbor-push-creds
+      initContainers:
+        - name: clone-source
+          image: alpine/git:2.47.1
+          args:
+            - clone
+            - --depth=1
+            - --branch=main
+            - https://github.com/aTapHub/atp.ApiAutomation.Portfolio.git
+            - /workspace
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+      containers:
+        - name: test
+          image: 192.168.0.139:30003/learning/api-automation-framework:latest
+          env:
+            - name: ApiSettings__Host
+              value: http://qa-practice-api:8081
+            - name: ApiSettings__API_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: api-creds
+                  key: API_USERNAME
+            - name: ApiSettings__API_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: api-creds
+                  key: API_PASSWORD
+          volumeMounts:
+            - name: workspace
+              mountPath: /app
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+      volumes:
+        - name: workspace
+          persistentVolumeClaim:
+            claimName: test-workspace

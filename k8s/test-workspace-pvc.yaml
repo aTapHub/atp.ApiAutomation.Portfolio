@@ -1,0 +1,16 @@
+# Shared storage for the test Job's cloned source + build output + report,
+# and for the report-retrieval Pod that reads it back out afterward (a Job's
+# own pod dies the instant its container exits, so kubectl cp/exec has
+# nothing left to talk to by then - a PVC lets a second, short-lived Pod
+# mount the same data after the fact).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-workspace
+  namespace: api-automation
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 2Gi
