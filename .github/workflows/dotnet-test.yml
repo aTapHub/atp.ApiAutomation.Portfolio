@@ -105,7 +105,13 @@ jobs:
       - name: Clean up test resources
         if: always()
         run: |
-          kubectl delete -f k8s/report-retrieval-pod.yaml -f k8s/test-workspace-pvc.yaml --ignore-not-found
+          # Delete the Pod first and wait for it to actually be gone before
+          # deleting the PVC - doing both in one command lets the PVC's
+          # delete request land before the pod is confirmed gone, which
+          # misses the pvc-protection controller's fast event-driven path
+          # and falls back to its much slower periodic resync (~5 minutes).
+          kubectl delete -f k8s/report-retrieval-pod.yaml --ignore-not-found --wait=true
+          kubectl delete -f k8s/test-workspace-pvc.yaml --ignore-not-found
 
       - name: Tear down Application Under Test
         if: always()
