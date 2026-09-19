@@ -1,0 +1,37 @@
+# Application Under Test. Deployed fresh per pipeline run and torn down
+# afterward (mirrors the old `docker run --rm ...` step in CI), rather than
+# left running permanently.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qa-practice-api
+  namespace: api-automation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qa-practice-api
+  template:
+    metadata:
+      labels:
+        app: qa-practice-api
+    spec:
+      containers:
+        - name: qa-practice-api
+          image: rvancea/qa-practice-api:latest
+          ports:
+            - containerPort: 8081
+          readinessProbe:
+            httpGet:
+              path: /swagger-ui.html
+              port: 8081
+            initialDelaySeconds: 10
+            periodSeconds: 3
+            failureThreshold: 40 # Spring Boot/Hibernate startup here takes ~60-90s
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi

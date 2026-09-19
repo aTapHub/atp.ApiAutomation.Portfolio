@@ -1,0 +1,13 @@
+# In-cluster DNS name for the test Job to reach: qa-practice-api:8081
+# (or qa-practice-api.api-automation.svc.cluster.local:8081 from elsewhere).
+apiVersion: v1
+kind: Service
+metadata:
+  name: qa-practice-api
+  namespace: api-automation
+spec:
+  selector:
+    app: qa-practice-api
+  ports:
+    - port: 8081
+      targetPort: 8081
