@@ -55,5 +55,17 @@ jobs:
             (kubectl logs job/kaniko-build -n api-automation; exit 1)
           kubectl logs job/kaniko-build -n api-automation
 
-      # AUT deployment, the test Job itself, and report retrieval are not
-      # wired up yet - next step in the migration to the Talos cluster.
+      - name: Deploy Application Under Test
+        run: |
+          kubectl apply -f k8s/aut-deployment.yaml
+          kubectl apply -f k8s/aut-service.yaml
+          kubectl wait --for=condition=available deploy/qa-practice-api -n api-automation --timeout=180s || \
+            (kubectl describe deploy/qa-practice-api -n api-automation; exit 1)
+
+      # The test Job itself and report retrieval are not wired up yet - next
+      # step in the migration to the Talos cluster.
+
+      - name: Tear down Application Under Test
+        if: always()
+        run: |
+          kubectl delete -f k8s/aut-deployment.yaml -f k8s/aut-service.yaml --ignore-not-found
