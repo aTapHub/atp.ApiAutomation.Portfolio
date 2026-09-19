@@ -77,6 +77,19 @@ and mounts it into the environment-only image built above - code changes never
 need an image rebuild, only Dockerfile/`.csproj` changes do (see the
 Dockerfile's own comment).
 
+**`test-workspace-pvc.yaml` is applied (not deleted) every run, reused across
+runs rather than recreated.** The initContainer wipes its contents before
+cloning fresh, so this is safe. This isn't just an optimization: deleting the
+PVC right after its Job's pod exits reliably raced Kubernetes' own
+`pvc-protection` controller — it tries to patch the PVC's `Unused` condition at
+almost the same moment, hits a resourceVersion conflict
+(`the object has been modified; please apply your changes to the latest
+version and try again`, visible in `kube-controller-manager`'s logs), and that
+conflict isn't retried quickly - the finalizer only actually clears on the
+controller's next periodic resync, which stalled cleanup for 4-5 minutes every
+single run. Reusing the PVC sidesteps the deletion path (and its race)
+entirely during normal operation.
+
 **Retrieving the report**: a Job's pod is gone the instant its container exits,
 so `kubectl cp`/`exec` have nothing left to talk to directly by the time the
 Job shows complete. Mount the same PVC into a short-lived Pod instead:
@@ -85,8 +98,11 @@ Job shows complete. Mount the same PVC into a short-lived Pod instead:
 kubectl apply -f k8s/report-retrieval-pod.yaml
 kubectl wait --for=condition=ready pod/report-retrieval -n api-automation --timeout=60s
 kubectl cp api-automation/report-retrieval:/app/atp.ApiAutomation.Framework/bin/Debug/net8.0/TestReport ./TestReport-latest -c retrieval
-kubectl delete -f k8s/report-retrieval-pod.yaml -f k8s/test-workspace-pvc.yaml
+kubectl delete -f k8s/report-retrieval-pod.yaml
 ```
+
+(Deleting just the retrieval Pod is fast - ~30s, its own default grace period.
+Only the PVC deletion path is the slow one described above.)
 
 On Windows, run `kubectl cp` from PowerShell, not Git Bash - MSYS rewrites the
 `namespace/pod:path` argument as if it were a filesystem path and mangles it.

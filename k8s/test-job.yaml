@@ -1,9 +1,12 @@
 # Runs the test suite against the AUT. Mirrors the "environment image, code
 # mounted fresh at run time" pattern: an initContainer clones the repo into a
-# shared PersistentVolumeClaim (test-workspace-pvc.yaml - apply that first),
-# and the main container - built from the environment-only image pushed by
-# kaniko-build-job.yaml - mounts that same volume at /app, so it finds source
-# at exactly the path its WORKDIR/ENTRYPOINT expect.
+# shared PersistentVolumeClaim (test-workspace-pvc.yaml - apply once, reused
+# across runs rather than recreated - deleting it right after its pod exits
+# reliably races the pvc-protection controller's own status update and stalls
+# for minutes, see k8s/README.md), and the main container - built from the
+# environment-only image pushed by kaniko-build-job.yaml - mounts that same
+# volume at /app, so it finds source at exactly the path its WORKDIR/
+# ENTRYPOINT expect.
 #
 # Requires "api-creds" (see k8s/README.md) with keys API_USERNAME/API_PASSWORD.
 # The report is retrieved afterward via report-retrieval-pod.yaml, which
@@ -25,12 +28,15 @@ spec:
       initContainers:
         - name: clone-source
           image: alpine/git:2.47.1
+          # The PVC is reused across runs (not recreated each time - see
+          # test-workspace-pvc.yaml), so wipe any previous run's contents
+          # before cloning. `git clone` refuses to target a non-empty dir.
+          command: ["sh", "-c"]
           args:
-            - clone
-            - --depth=1
-            - --branch=main
-            - https://github.com/aTapHub/atp.ApiAutomation.Portfolio.git
-            - /workspace
+            - >-
+              rm -rf /workspace/* /workspace/.[!.]* 2>/dev/null;
+              git clone --depth=1 --branch=main
+              https://github.com/aTapHub/atp.ApiAutomation.Portfolio.git /workspace
           volumeMounts:
             - name: workspace
               mountPath: /workspace
