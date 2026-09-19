@@ -22,9 +22,11 @@ jobs:
 
       - name: Install kubectl
         run: |
+          mkdir -p "$HOME/bin"
           curl -LO "https://dl.k8s.io/release/v1.37.0/bin/linux/amd64/kubectl"
-          install -m 0755 kubectl /usr/local/bin/kubectl
-          kubectl version --client
+          install -m 0755 kubectl "$HOME/bin/kubectl"
+          echo "$HOME/bin" >> "$GITHUB_PATH"
+          "$HOME/bin/kubectl" version --client
 
       - name: Reconcile namespace and RBAC
         run: |
